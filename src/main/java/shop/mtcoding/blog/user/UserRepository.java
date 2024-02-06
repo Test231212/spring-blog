@@ -2,6 +2,7 @@ package shop.mtcoding.blog.user;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 @Repository // IoC에 new하는 방법
