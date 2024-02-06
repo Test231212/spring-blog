@@ -18,6 +18,25 @@ public class BoardController {
     private final HttpSession session;
     private final BoardRepository boardRepository;
 
+
+    @PostMapping("/board/{id}/delete")
+    public String delete(@PathVariable int id, HttpServletRequest request) {
+        // 1. 인증 안되면 나가
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null) { // 401
+            return "redirect:/loginForm";
+        }
+
+        // 2. 권한 없으면 나가
+        Board board = boardRepository.findById(id);
+        if(board.getUserId() != sessionUser.getId()){
+            request.setAttribute("status", 403);
+            request.setAttribute("msg", "게시글을 삭제할 권한이 없습니다");
+            return "error/40x";
+        }
+
+        return "redirect:/";
+    }
     @PostMapping("/board/save")
     public String save(BoardRequest.SaveDTO requestDTO, HttpServletRequest request) {
         // 1. 인증 체크
@@ -67,7 +86,7 @@ public class BoardController {
     @GetMapping("/board/{id}")
     public String detail(@PathVariable int id, HttpServletRequest request) {
         // 1. 모델 진입 - 상세보기 데이터 가져오기
-        BoardResponse.DetailDTO responseDTO = boardRepository.findById(id);
+        BoardResponse.DetailDTO responseDTO = boardRepository.findByIdWithUser(id);
 
         // 2. 페이지 주인 여부 체크 (board의 userId와 sessionUser의 id를 비교)
         User sessionUser = (User) session.getAttribute("sessionUser");
