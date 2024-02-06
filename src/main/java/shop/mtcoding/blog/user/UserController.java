@@ -44,20 +44,25 @@ public class UserController {
         userRepository.save(requestDTO); // 모델에 위임하기
         return "redirect:/loginForm";
     }
+
     @GetMapping("/joinForm")
     public String joinForm() {
         return "user/joinForm";
     }
+
     @GetMapping("/loginForm")
     public String loginForm() {
         return "user/loginForm";
     }
+
     @GetMapping("/user/updateForm")
     public String updateForm() {
         return "user/updateForm";
     }
+
     @GetMapping("/logout")
     public String logout() {
+        session.invalidate();
         return "redirect:/";
     }
 }
