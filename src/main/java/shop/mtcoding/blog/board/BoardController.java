@@ -4,10 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import shop.mtcoding.blog.user.User;
 
 import java.util.HashMap;
@@ -17,6 +14,14 @@ import java.util.List;
 public class BoardController {
     private final HttpSession session;
     private final BoardRepository boardRepository;
+
+    @GetMapping("/board/{id}/updateForm")
+    public String updateForm(@PathVariable int id, HttpServletRequest request){
+        Board board = boardRepository.findById(id);
+        request.setAttribute("board", board);
+
+        return "board/updateForm";
+    }
 
 
     @PostMapping("/board/{id}/delete")
@@ -29,14 +34,18 @@ public class BoardController {
 
         // 2. 권한 없으면 나가
         Board board = boardRepository.findById(id);
-        if(board.getUserId() != sessionUser.getId()){
+        if (board.getUserId() != sessionUser.getId()) {
             request.setAttribute("status", 403);
             request.setAttribute("msg", "게시글을 삭제할 권한이 없습니다");
             return "error/40x";
         }
 
+        boardRepository.deleteById(id);
+
         return "redirect:/";
     }
+
+
     @PostMapping("/board/save")
     public String save(BoardRequest.SaveDTO requestDTO, HttpServletRequest request) {
         // 1. 인증 체크
@@ -90,18 +99,16 @@ public class BoardController {
 
         // 2. 페이지 주인 여부 체크 (board의 userId와 sessionUser의 id를 비교)
         User sessionUser = (User) session.getAttribute("sessionUser");
-
         boolean pageOwner;
-        if(sessionUser == null){
+        if (sessionUser == null) {
             pageOwner = false;
-        }else{
+        } else {
             int 게시글작성자번호 = responseDTO.getUserId();
             int 로그인한사람의번호 = sessionUser.getId();
             pageOwner = 게시글작성자번호 == 로그인한사람의번호;
         }
-
         request.setAttribute("board", responseDTO);
         request.setAttribute("pageOwner", pageOwner);
         return "board/detail";
     }
-    }
+}
