@@ -15,14 +15,49 @@ public class BoardController {
     private final HttpSession session;
     private final BoardRepository boardRepository;
 
+    // ?title=제목1&content=내용1
+    // title=제목1&content=내용1
+    @PostMapping("/board/{id}/update")
+    public String update(@PathVariable int id, BoardRequest.UpdateDTO requestDTO){
+       // 인증 체크
+            User sessionUser = (User) session.getAttribute("sessionUser");
+            if (sessionUser == null) {
+                return "redirect:/loginForm";
+            }
+       // 권한 체크
+        Board board = boardRepository.findById(id);
+        if (board.getUserId() != sessionUser.getId()) {
+            return "error/403";
+        }
+       // 핵심 로직
+       // update board_tb set title = ?, content = ? where id = ?;
+        boardRepository.update(requestDTO, id);
+
+        return "redirect:/board/"+id;
+    }
 
     @GetMapping("/board/{id}/updateForm")
     public String updateForm(@PathVariable int id, HttpServletRequest request){
+        // 인증 체크
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null) { // 401
+            return "redirect:/loginForm";
+        }
+        // 모델 위임 (id로 board를 조회)
         Board board = boardRepository.findById(id);
+
+        // 권한 체크
+        if (board.getUserId() != sessionUser.getId()) {
+
+            return "error/403";
+        }
+
+        // 가방에 담기
         request.setAttribute("board", board);
 
         return "board/updateForm";
     }
+
 
     @PostMapping("/board/{id}/delete")
     public String delete(@PathVariable int id, HttpServletRequest request) {
