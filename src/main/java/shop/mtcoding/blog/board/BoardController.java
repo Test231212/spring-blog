@@ -3,9 +3,13 @@ package shop.mtcoding.blog.board;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import shop.mtcoding.blog._core.config.security.MyLoginUser;
 import shop.mtcoding.blog.user.User;
+import shop.mtcoding.blog.user.UserRepository;
+import shop.mtcoding.blog.user.UserRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,15 +19,13 @@ public class BoardController {
     private final HttpSession session;
     private final BoardRepository boardRepository;
 
-    // ?title=제목1&content=내용1
+
+        // ?title=제목1&content=내용1
     // title=제목1&content=내용1
     @PostMapping("/board/{id}/update")
     public String update(@PathVariable int id, BoardRequest.UpdateDTO requestDTO){
        // 인증 체크
             User sessionUser = (User) session.getAttribute("sessionUser");
-            if (sessionUser == null) {
-                return "redirect:/loginForm";
-            }
        // 권한 체크
         Board board = boardRepository.findById(id);
         if (board.getUserId() != sessionUser.getId()) {
@@ -40,9 +42,6 @@ public class BoardController {
     public String updateForm(@PathVariable int id, HttpServletRequest request){
         // 인증 체크
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null) { // 401
-            return "redirect:/loginForm";
-        }
         // 모델 위임 (id로 board를 조회)
         Board board = boardRepository.findById(id);
 
@@ -63,10 +62,6 @@ public class BoardController {
     public String delete(@PathVariable int id, HttpServletRequest request) {
         // 1. 인증 안되면 나가
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null) { // 401
-            return "redirect:/loginForm";
-        }
-
         // 2. 권한 없으면 나가
         Board board = boardRepository.findById(id);
         if (board.getUserId() != sessionUser.getId()) {
@@ -85,10 +80,6 @@ public class BoardController {
     public String save(BoardRequest.SaveDTO requestDTO, HttpServletRequest request) {
         // 1. 인증 체크
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null) {
-            return "redirect:/loginForm";
-        }
-
         // 2. 바디 데이터 확인 및 유효성 검사
         System.out.println(requestDTO);
 
@@ -106,9 +97,9 @@ public class BoardController {
     }
 
 
-    @GetMapping({"/", "/board"})
-    public String index(HttpServletRequest request) {
-
+    @GetMapping("/")
+    public String index(HttpServletRequest request, @AuthenticationPrincipal MyLoginUser myLoginUser) {
+        System.out.println("로그인 되었나? : "+myLoginUser.getUsername());
         List<Board> boardList = boardRepository.findAll();
         request.setAttribute("boardList", boardList);
         return "index";
