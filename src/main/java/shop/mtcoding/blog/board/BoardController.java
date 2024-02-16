@@ -106,13 +106,29 @@ public class BoardController {
 
         return "redirect:/";
     }
+    // localhost:8080?page=1 -> page 값이 1
+    // localhost:8080  -> page 값이 0
+    @GetMapping("/")
+    public String index(
+            HttpServletRequest request,
+            @RequestParam(value = "page", defaultValue = "0") Integer page) {
+        List<Board> boardList = boardRepository.findAll(page);
 
+        // 전체 페이지 개수
+        int count = boardRepository.count().intValue();
+        // 5 -> 2page
+        // 6 -> 2page
+        // 7 -> 3page
+        // 8 -> 3page
+        int namerge = count % 3 == 0 ? 0 : 1;
+        int allPageCount = count / 3 + namerge;
 
-    @GetMapping({"/", "/board"})
-    public String index(HttpServletRequest request) {
-
-        List<Board> boardList = boardRepository.findAll();
         request.setAttribute("boardList", boardList);
+        request.setAttribute("first", page==0);
+        request.setAttribute("last", allPageCount == page+1);
+        request.setAttribute("prev", page-1);
+        request.setAttribute("next", page+1);
+
         return "index";
     }
     //   /board/saveForm 요청(Get)이 온다
