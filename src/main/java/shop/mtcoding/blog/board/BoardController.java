@@ -137,11 +137,13 @@ public class BoardController {
 
         boardDTO.isBoardOwner(sessionUser);
 
-        List<BoardResponse.ReplyDTO> replyDTOList = replyRepository.findByBoardId(id);
+        List<BoardResponse.ReplyDTO> replyDTOList = replyRepository.findByBoardId(id, sessionUser);
 
 
         request.setAttribute("board", boardDTO);
         request.setAttribute("replyList", replyDTOList);
+
+
 
         return "board/detail";
     }
