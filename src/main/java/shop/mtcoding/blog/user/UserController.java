@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import shop.mtcoding.blog._core.util.Script;
+
 @RequiredArgsConstructor // final이 붙은 애들에 대한 생성자를 만들어줌
 @Controller
 public class UserController {
@@ -29,11 +32,8 @@ public class UserController {
 
         User user = userRepository.findByUsernameAndPassword(requestDTO);
 
-        if(user == null){ // 조회 안됨 (401)
-            return "error/401";
-        }else{ // 조회 됐음 (인증됨)
-            session.setAttribute("sessionUser", user); // 락카에 담음 (StateFul)
-        }
+        session.setAttribute("sessionUser", user); // 락카에 담음 (StateFul)
+
 
         return "redirect:/"; // 컨트롤러가 존재하면 무조건 redirect 외우기
     }
@@ -41,7 +41,12 @@ public class UserController {
     @PostMapping("/join")
     public String join(UserRequest.JoinDTO requestDTO){
         System.out.println(requestDTO);
-        userRepository.save(requestDTO); // 모델에 위임하기
+
+        try {
+            userRepository.save(requestDTO); // 모델에 위임하기
+        }catch (Exception e){
+            throw new RuntimeException("아이디가 중복되었어요");
+        }
         return "redirect:/loginForm";
     }
 
