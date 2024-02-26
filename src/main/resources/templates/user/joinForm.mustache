@@ -1,4 +1,4 @@
-{{> layout/header}}
+{{> /layout/header}}
 
 <div class="container p-5">
 
@@ -25,16 +25,20 @@
         </div>
     </div>
 </div>
+
 <script>
     let isSameCheck = false;
+
     function valid(){
         if(isSameCheck == false){
             alert("아이디 중복체크를 해야 합니다");
         }
         return isSameCheck;
     }
+
     function usernameSameCheck(){
         let username = $("#username").val();
+
         $.ajax({
             url: "/api/username-same-check?username="+username,
             type: "get"
@@ -53,5 +57,4 @@
     }
 </script>
 
-
-{{> layout/footer}}
+{{> /layout/footer}}

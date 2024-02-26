@@ -19,10 +19,21 @@
     <!-- 게시글내용 -->
     <div>
         <h2><b>{{board.title}}</b></h2>
-        <hr />
+        <hr/>
         <div class="m-4 p-2">
             {{board.content}}
         </div>
+    </div>
+
+    <!--좋아요 부분-->
+    <div>
+        {{#love.isLove}}
+            <i class="fas fa-heart text-danger"></i>
+        {{/love.isLove}}
+        {{^love.isLove}}
+            <i class="far fa-heart"></i>
+        {{/love.isLove}}
+        <span>{{love.loveCount}}</span>
     </div>
 
     <!-- 댓글 -->
@@ -31,8 +42,7 @@
         <div class="card-body">
             <form action="/reply/save" method="post">
                 <input type="hidden" name="boardId" value="{{board.id}}">
-                <textarea class="form-control" rows="2" name="comment">
-                </textarea>
+                <textarea class="form-control" rows="2" name="comment"></textarea>
                 <div class="d-flex justify-content-end">
                     <button type="submit" class="btn btn-outline-primary mt-1">댓글등록</button>
                 </div>
@@ -61,6 +71,8 @@
 
                 </div>
             {{/replyList}}
+
+
 
         </div>
     </div>
