@@ -16,6 +16,25 @@ import java.util.List;
 public class LoveRepository {
     private final EntityManager em;
 
+    public Love findById(int id) {
+        Query query = em.createNativeQuery("select * from love_tb where id = ?", Love.class);
+        query.setParameter(1, id);
+
+        Love love = (Love) query.getSingleResult();
+        return love;
+    }
+
+    @Transactional
+    public void deleteById(int id) {
+        Query query = em.createNativeQuery("delete from love_tb where id = ?");
+        query.setParameter(1, id);
+
+        query.executeUpdate();
+    }
+
+
+
+
     public LoveResponse.DetailDTO findLove(int boardId) {
         String q = """
                 SELECT count(*) loveCount
@@ -84,4 +103,17 @@ public class LoveRepository {
         return responseDTO;
     }
 
+    @Transactional
+    public Love save(LoveRequest.SaveDTO requestDTO, int sessionUserId) {
+        Query query = em.createNativeQuery("insert into love_tb(board_id, user_id, created_at) values(?,?, now())");
+        query.setParameter(1, requestDTO.getBoardId());
+        query.setParameter(2, sessionUserId);
+
+        query.executeUpdate();
+
+        Query q = em.createNativeQuery("select * from love_tb where id = (select max(id) from love_tb)", Love.class);
+
+        Love love = (Love) q.getSingleResult();
+        return love;
+    }
 }

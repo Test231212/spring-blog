@@ -28,13 +28,66 @@
     <!--좋아요 부분-->
     <div>
         {{#love.isLove}}
-            <i class="fas fa-heart text-danger"></i>
+            <i id="love" onclick="loveToggle({{board.id}})" class="fas fa-heart text-danger"></i>
         {{/love.isLove}}
         {{^love.isLove}}
-            <i class="far fa-heart"></i>
+            <i id="love" onclick="loveToggle({{board.id}})" class="far fa-heart"></i>
         {{/love.isLove}}
-        <span>{{love.loveCount}}</span>
+        <input type="hidden" id="love-id" value="{{love.id}}">
+        <span id="loveCount">{{love.loveCount}}</span>
     </div>
+
+    <script>
+        function loveToggle(boardId) {
+
+            // 좋아요 하기
+            if($("#love").hasClass("far")){
+
+                let love = {
+                    boardId: boardId
+                }
+
+                $.ajax({
+                    url: "/api/love",
+                    type: "post",
+                    data: JSON.stringify(love),
+                    contentType: "application/json; charset=utf-8"
+                }).done((res) => {
+                    console.log(res);
+                    $("#love").removeClass("far");
+                    $("#love").addClass("text-danger");
+                    $("#love").addClass("fas");
+                    let loveCount = $("#loveCount").text();
+                    $("#loveCount").text(Number(loveCount) + 1);
+
+                    // 좋아요가 되면 love id를 변경해야함
+                    $("#love-id").val(res.body.id);
+                }).fail((res) => {
+                    alert(res.responseJSON.msg);
+                });
+            }else{ // 좋아요 취소 하기
+                let loveId = $("#love-id").val();
+                $.ajax({
+                    url: "/api/love/" + loveId,
+                    type: "delete"
+                }).done((res) => {
+                    console.log(res);
+                    $("#love").removeClass("fas");
+                    $("#love").removeClass("text-danger");
+                    $("#love").addClass("far");
+                    let loveCount = $("#loveCount").text();
+                    $("#loveCount").text(Number(loveCount) - 1);
+
+                    // 좋아요가 취소되면 love id 초기화
+                    $("#love-id").val(0);
+                }).fail((res) => {
+                    alert(res.responseJSON.msg);
+                });
+            }
+
+
+        }
+    </script>
 
     <!-- 댓글 -->
     <div class="card mt-3">
